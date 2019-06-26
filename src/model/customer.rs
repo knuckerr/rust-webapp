@@ -136,7 +136,7 @@ pub fn get_customer_by_id(conn: &PgPool, id: i32) -> Result<Costumer, Error> {
 
 pub fn del_customer_by_id(conn: &PgPool, id: i32) -> Result<Msg, Error> {
     let conn = conn.get()?;
-    conn.execute("DELETE customers WHERE id = $1", &[&id])?;
+    conn.execute("DELETE FROM customers WHERE id = $1", &[&id])?;
     let customer_name = format!("customer with id {}",id);
     Ok(Msg::new(&customer_name,"deleted was sucess"))
 }
