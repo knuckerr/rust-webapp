@@ -1,0 +1,18 @@
+version: '3.1'
+services:
+    adminer:
+        image:
+            dockette/adminer:full
+        restart:
+            always
+        ports:
+            - "8000:80"
+    dbPostgres:
+        image: postgres:10
+        restart: always
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_USER: root
+            POSTGRES_PASSWORD: root
+            POSTGRES_DB: mydb
