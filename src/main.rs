@@ -21,6 +21,7 @@ fn main() {
                        .route(web::post().to_async(api::clients::new_customer)))
 
               .service(web::resource("/get_client").route(web::get().to_async(api::clients::get_by_id)))
+              .service(web::resource("/del_client").route(web::post().to_async(api::clients::del_by_id)))
     };
     dbg!("Constructing the App");
     HttpServer::new(app).bind("localhost:8088").expect("cannot_bind").run().expect("Error running server");

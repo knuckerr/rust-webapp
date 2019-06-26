@@ -133,6 +133,14 @@ pub fn get_customer_by_id(conn: &PgPool, id: i32) -> Result<Costumer, Error> {
     Ok(customer)
 }
 
+
+pub fn del_customer_by_id(conn: &PgPool, id: i32) -> Result<Msg, Error> {
+    let conn = conn.get()?;
+    conn.execute("DELETE customers WHERE id = $1", &[&id])?;
+    let customer_name = format!("customer with id {}",id);
+    Ok(Msg::new(&customer_name,"deleted was sucess"))
+}
+
 pub fn new_customer(conn: &PgPool, customer: &Costumer) -> Result<Msg, Error> {
     let conn = conn.get()?;
     conn.execute("INSERT INTO customers (company_name, vat_id, address, area, legal_name, emails, phones, postcode, website) VALUES ($1, $2,$3,$4,$5,$6,$7,$8,$9)",

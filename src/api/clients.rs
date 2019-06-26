@@ -37,6 +37,19 @@ pub fn get_by_id(
         })
 }
 
+pub fn del_by_id(
+    pool: web::Data<connection::PgPool>,clientquery:Query<ClientQuery>) -> impl Future<Item = HttpResponse, Error = Error> {
+    web::block(move || customer::del_customer_by_id(&pool,clientquery.id))
+        .from_err()
+        .then(move |res| match res {
+            Ok(tasks) => {
+
+                Ok(HttpResponse::Ok().json(tasks))
+            }
+            Err(e) => Err(e),
+        })
+}
+
 
 pub fn new_customer(
     pool: web::Data<connection::PgPool>,customer:Json<customer::Costumer>) -> impl Future<Item = HttpResponse, Error = Error> {
