@@ -64,3 +64,16 @@ pub fn new_customer(
         })
 }
 
+pub fn update_customer(
+    pool: web::Data<connection::PgPool>,customer:Json<customer::Costumer>,query:Query<ClientQuery>) -> impl Future<Item = HttpResponse, Error = Error> {
+    web::block(move || customer::update_customer(&pool,&customer,query.id))
+        .from_err()
+        .then(move |res| match res {
+            Ok(msg) => {
+
+                Ok(HttpResponse::Ok().json(msg))
+            }
+            Err(e) => Err(e),
+        })
+}
+

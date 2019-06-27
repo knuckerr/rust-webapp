@@ -3,12 +3,14 @@ services:
     adminer:
         image:
             dockette/adminer:full
+        container_name: "adminer"
         restart:
             always
         ports:
             - "8000:80"
     dbPostgres:
         image: postgres:10
+        container_name: "postgres"
         restart: always
         ports:
             - "5432:5432"

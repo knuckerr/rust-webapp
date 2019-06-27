@@ -13,8 +13,7 @@ pub struct Emails {
     pub accounting_email: String,
 }
 
-
-#[derive(Debug,Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Costumer {
     #[serde(default)]
     pub id: i32,
@@ -28,7 +27,6 @@ pub struct Costumer {
     pub phones: Option<Value>,
     pub email: Option<Value>,
 }
-
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Msg {
@@ -124,7 +122,7 @@ pub fn get_customers(conn: &PgPool) -> Result<Vec<Costumer>, Error> {
 }
 
 pub fn get_customer_by_id(conn: &PgPool, id: i32) -> Result<Costumer, Error> {
-    let mut customer :Costumer = Default::default();
+    let mut customer: Costumer = Default::default();
     let conn = conn.get()?;
     let rows = conn.query("SELECT * FROM customers WHERE id = $1", &[&id])?;
     for row in rows.into_iter() {
@@ -133,12 +131,11 @@ pub fn get_customer_by_id(conn: &PgPool, id: i32) -> Result<Costumer, Error> {
     Ok(customer)
 }
 
-
 pub fn del_customer_by_id(conn: &PgPool, id: i32) -> Result<Msg, Error> {
     let conn = conn.get()?;
     conn.execute("DELETE FROM customers WHERE id = $1", &[&id])?;
-    let customer_name = format!("customer with id {}",id);
-    Ok(Msg::new(&customer_name,"deleted was sucess"))
+    let customer_name = format!("customer with id {}", id);
+    Ok(Msg::new(&customer_name, "deleted was sucess"))
 }
 
 pub fn new_customer(conn: &PgPool, customer: &Costumer) -> Result<Msg, Error> {
@@ -146,4 +143,11 @@ pub fn new_customer(conn: &PgPool, customer: &Costumer) -> Result<Msg, Error> {
     conn.execute("INSERT INTO customers (company_name, vat_id, address, area, legal_name, emails, phones, postcode, website) VALUES ($1, $2,$3,$4,$5,$6,$7,$8,$9)",
                  &[&customer.company_name, &customer.vat_id,&customer.address,&customer.area,&customer.legal_name,&customer.email,&customer.phones,&customer.postcode,&customer.website])?;
     Ok(Msg::new(&customer.company_name, "insert success"))
+}
+
+pub fn update_customer(conn: &PgPool, customer:&Costumer,id:i32) -> Result<Msg, Error> {
+    let conn = conn.get()?;
+    conn.execute("UPDATE customers SET company_name = $1, vat_id=$2, address=$3, area=$4, legal_name=$5, emails=$6, phones=$7, postcode=$8, website=$9 WHERE id = $10",
+                 &[&customer.company_name, &customer.vat_id,&customer.address,&customer.area,&customer.legal_name,&customer.email,&customer.phones,&customer.postcode,&customer.website,&id])?;
+    Ok(Msg::new(&customer.company_name, "update success"))
 }
