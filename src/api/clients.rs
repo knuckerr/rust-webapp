@@ -77,6 +77,7 @@ pub fn update_customer(
 
                 Ok(HttpResponse::Ok().json(msg))
             }
+
             Err(e) => {
                 dbg!(e);
                 Err(ServiceError::InternalServerError)},
