@@ -1,86 +1,61 @@
-use crate::common::connection;
-use crate::model::customer;
-use crate::api::errors::ServiceError;
-use actix_web::{web, Error, HttpResponse};
-use actix_web::web::{Json,Query};
-use futures::future::Future;
+use crate::model::customer::{Costumer,Emails,rows_to_struct};
+use crate::common::connection::PgPool;
+use failure::Error;
 
-use serde::Deserialize;
 
-#[derive(Deserialize)]
-pub struct ClientQuery {
-   id: i32,
+#[juniper::object]
+impl Costumer{
+    fn id(&self) -> i32 {
+        self.id
+    }
+    fn companyName(&self) -> &str {
+        &self.company_name 
+    }
+    fn vatId(&self) -> &str {
+        &self.vat_id
+    }
+    fn address(&self) -> &str {
+        &self.address
+    }
+    fn area(&self) -> &str {
+        &self.area
+    }
+    fn legalName(&self) -> &str {
+        &self.legal_name
+    }
+    fn website(&self) -> &str {
+        &self.website
+    }
+    fn postcode(&self) -> i32 {
+        self.postcode
+    }
+
 }
 
-pub fn index(
-    pool: web::Data<connection::PgPool>) -> impl Future<Item = HttpResponse, Error = ServiceError> {
-    web::block(move || customer::get_customers(&pool))
-        .then(move |res| match res {
-            Ok(tasks) => {
+#[juniper::object]
+impl Emails{
+    fn primaryEmail(&self) -> &str{
+        &self.primary_email
+    }
+    fn salesEmail(&self) -> &str {
+        &self.sales_email
+    }
+    fn customerSuport(&self) -> &str{
+        &self.customer_suport
+    }
+    fn accountingEmail(&self) -> &str{
+        &self.accounting_email
+    }
 
-                Ok(HttpResponse::Ok().json(tasks))
-            }
-            Err(e) => {
-                dbg!(e);
-                Err(ServiceError::InternalServerError)},
-        }).from_err()
 }
 
-pub fn get_by_id(
-    pool: web::Data<connection::PgPool>,clientquery:Query<ClientQuery>) -> impl Future<Item = HttpResponse, Error = Error> {
-    web::block(move || customer::get_customer_by_id(&pool,clientquery.id))
-        .then(move |res| match res {
-            Ok(tasks) => {
-
-                Ok(HttpResponse::Ok().json(tasks))
-            }
-            Err(e) => {
-                dbg!(e);
-                Err(ServiceError::InternalServerError)},
-        }).from_err()
-}
-
-pub fn del_by_id(
-    pool: web::Data<connection::PgPool>,clientquery:Query<ClientQuery>) -> impl Future<Item = HttpResponse, Error = Error> {
-    web::block(move || customer::del_customer_by_id(&pool,clientquery.id))
-        .then(move |res| match res {
-            Ok(tasks) => {
-
-                Ok(HttpResponse::Ok().json(tasks))
-            }
-            Err(e) => {
-                dbg!(e);
-                Err(ServiceError::InternalServerError)},
-        }).from_err()
-}
-
-
-pub fn new_customer(
-    pool: web::Data<connection::PgPool>,customer:Json<customer::Costumer>) -> impl Future<Item = HttpResponse, Error = Error> {
-    web::block(move || customer::new_customer(&pool,&customer))
-        .then(move |res| match res {
-            Ok(msg) => {
-
-                Ok(HttpResponse::Ok().json(msg))
-            }
-            Err(e) => {
-                dbg!(e);
-                Err(ServiceError::InternalServerError)},
-        }).from_err()
-}
-
-pub fn update_customer(
-    pool: web::Data<connection::PgPool>,customer:Json<customer::Costumer>,query:Query<ClientQuery>) -> impl Future<Item = HttpResponse, Error = Error> {
-    web::block(move || customer::update_customer(&pool,&customer,query.id))
-        .then(move |res| match res {
-            Ok(msg) => {
-
-                Ok(HttpResponse::Ok().json(msg))
-            }
-
-            Err(e) => {
-                dbg!(e);
-                Err(ServiceError::InternalServerError)},
-        }).from_err()
+pub fn get_customer_by_id(conn: &PgPool, id: i32) -> Result<Costumer, Error> {
+    let mut customer: Costumer = Default::default();
+    let conn = conn.get()?;
+    let rows = conn.query("SELECT * FROM customers WHERE id = $1", &[&id])?;
+    for row in rows.into_iter() {
+        customer = rows_to_struct(row)?;
+    }
+    Ok(customer)
 }
 
